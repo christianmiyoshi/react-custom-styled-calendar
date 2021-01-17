@@ -1,7 +1,7 @@
-import { ExampleComponent } from '.'
+import { ReactCustomStyledCalendar } from '.'
 
 describe('ExampleComponent', () => {
   it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
+    expect(ReactCustomStyledCalendar).toBeTruthy()
   })
 })
