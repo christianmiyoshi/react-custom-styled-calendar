@@ -11,7 +11,6 @@ import {
   getMonth,
   endOfWeek
 } from 'date-fns'
-
 import { groupBy, take } from 'lodash'
 
 const Container = styled.div``
@@ -22,28 +21,25 @@ const MonthLabel = styled.div`
   text-align: center;
   padding-bottom: 10px;
 `
+export interface IStyleByDate {
+  [date: string]: {
+    fontColor?: string
+    leftBackgroundColor?: string
+    rightBackgroundColor?: string
+    capsuleBackgroundColor?: string
+  }
+}
 
-type ReactCustomStyledCalendarProps = {
+export interface ReactCustomStyledCalendarProps {
   month: number
   year: number
   showYear?: boolean
+  showMonth?: boolean
   onClick?: (date: Date) => void
-  styleByDate?: {
-    [date: string]: {
-      fontColor?: string
-      leftBackgroundColor?: string
-      rightBackgroundColor?: string
-      capsuleBackgroundColor?: string
-    }
-  }
-  extraDayStyleByDate?: {
-    [date: string]: {
-      fontColor?: string
-      leftBackgroundColor?: string
-      rightBackgroundColor?: string
-      capsuleBackgroundColor?: string
-    }
-  }
+  onHover?: (date: Date) => void
+  isClickOnCapsule?: boolean
+  styleByDate?: IStyleByDate
+  extraDayStyleByDate?: IStyleByDate
   dayColor?: string
   extraDayColor?: string
   showExtraDays?: boolean
@@ -52,7 +48,7 @@ type ReactCustomStyledCalendarProps = {
   headerBackground?: string
 }
 
-const emptyFunction = () => {}
+// const emptyFunction = () => {}
 
 const calculateDatesToShowInMonth = (
   year: number,
@@ -90,26 +86,31 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
   month,
   year,
   showYear = true,
-  onClick = emptyFunction,
-  dayColor = '#000000',
-  extraDayColor = '#aaaaaa',
+  showMonth = true,
+  isClickOnCapsule = true,
+  onClick = (date: Date) => console.log('click', date),
+  onHover = (date: Date) => console.log('hover', date),
+  dayColor = '#000',
+  extraDayColor = '#ccc',
   styleByDate = {},
   extraDayStyleByDate = {},
   showExtraDays = true,
   showSixWeeks = true,
-  bodyBackground = '#ff00ff',
-  headerBackground = '#00ffff'
+  bodyBackground = '#fff',
+  headerBackground = '#fff'
 }) => {
   const { startMonth, daysGroupedByWeek } = useMemo(
     () => calculateDatesToShowInMonth(year, month, showSixWeeks),
     [year, month, showSixWeeks]
   )
 
+  const title =
+    (showMonth || showYear) &&
+    format(startMonth, `${showMonth ? 'MMMM' : ''}${showYear ? ' y' : ''}`)
+
   return (
     <Container>
-      <MonthLabel>
-        {format(startMonth, `MMMM${showYear ? ' y' : ''}`)}
-      </MonthLabel>
+      {title && <MonthLabel>{title}</MonthLabel>}
       <table
         cellPadding='0'
         style={{
@@ -124,9 +125,9 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
               <th key={format(date, 'd')} style={{ width: '14%' }}>
                 <div
                   style={{
-                    textAlign: 'center',
+                    display: 'flex',
+                    justifyContent: 'center',
                     padding: '5px 0 5px 0',
-                    // backgroundColor: 'orange',
                     fontSize: '10px'
                   }}
                 >
@@ -137,12 +138,14 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
           </tr>
         </thead>
         <tbody style={{ backgroundColor: bodyBackground }}>
-          {Object.entries(daysGroupedByWeek).map(([index, week]) => {
+          {Object.entries(daysGroupedByWeek).map(([week, dates]) => {
             return (
-              <tr key={index}>
-                {week.map((date) => {
+              <tr key={week}>
+                {dates.map((date) => {
                   const isExtraDay = getMonth(date) !== month
                   const isNormalDay = !isExtraDay
+                  const isVisible = isNormalDay || showExtraDays
+
                   const style = isNormalDay
                     ? styleByDate[format(date, 'yyyy-MM-dd')]
                     : extraDayStyleByDate[format(date, 'yyyy-MM-dd')]
@@ -151,17 +154,20 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
 
                   return (
                     <td key={format(date, 'd')}>
-                      {(isNormalDay || showExtraDays) && (
+                      {isVisible && (
                         <div
                           style={{
                             position: 'relative',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            marginTop: '10px'
-                            // marginBottom: '5px',
-                            // backgroundColor: 'blue'
+                            marginTop: '10px',
+                            cursor: !isClickOnCapsule ? 'pointer' : ''
                           }}
+                          onClick={() => !isClickOnCapsule && onClick(date)}
+                          onMouseEnter={() =>
+                            !isClickOnCapsule && onHover(date)
+                          }
                         >
                           <div
                             style={{
@@ -197,9 +203,13 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
                               alignItems: 'center',
                               width: '40px',
                               height: '40px',
-                              color: style?.fontColor || defaultColor
+                              color: style?.fontColor || defaultColor,
+                              cursor: isClickOnCapsule ? 'pointer' : ''
                             }}
-                            onClick={() => onClick(date)}
+                            onClick={() => isClickOnCapsule && onClick(date)}
+                            onMouseEnter={() =>
+                              isClickOnCapsule && onHover(date)
+                            }
                           >
                             {format(date, 'd')}
                           </div>
