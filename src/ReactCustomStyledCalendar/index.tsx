@@ -1,4 +1,4 @@
-import React, { useMemo, CSSProperties } from 'react'
+import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import {
   startOfWeek,
@@ -14,15 +14,13 @@ import {
 
 import { groupBy, take } from 'lodash'
 
-const Container = styled.div`
-  width: 300px;
-`
+const Container = styled.div``
 
 const MonthLabel = styled.div`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   text-align: center;
-  margin-top: 10px;
+  padding-bottom: 10px;
 `
 
 type ReactCustomStyledCalendarProps = {
@@ -30,12 +28,28 @@ type ReactCustomStyledCalendarProps = {
   year: number
   showYear?: boolean
   onClick?: (date: Date) => void
-  styleByDate?: { [date: string]: CSSProperties }
-  extraDayStyleByDate?: { [date: string]: CSSProperties }
+  styleByDate?: {
+    [date: string]: {
+      fontColor?: string
+      leftBackgroundColor?: string
+      rightBackgroundColor?: string
+      capsuleBackgroundColor?: string
+    }
+  }
+  extraDayStyleByDate?: {
+    [date: string]: {
+      fontColor?: string
+      leftBackgroundColor?: string
+      rightBackgroundColor?: string
+      capsuleBackgroundColor?: string
+    }
+  }
   dayColor?: string
   extraDayColor?: string
   showExtraDays?: boolean
   showSixWeeks?: boolean
+  bodyBackground?: string
+  headerBackground?: string
 }
 
 const emptyFunction = () => {}
@@ -82,7 +96,9 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
   styleByDate = {},
   extraDayStyleByDate = {},
   showExtraDays = true,
-  showSixWeeks = true
+  showSixWeeks = true,
+  bodyBackground = '#ff00ff',
+  headerBackground = '#00ffff'
 }) => {
   const { startMonth, daysGroupedByWeek } = useMemo(
     () => calculateDatesToShowInMonth(year, month, showSixWeeks),
@@ -94,73 +110,98 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
       <MonthLabel>
         {format(startMonth, `MMMM${showYear ? ' y' : ''}`)}
       </MonthLabel>
-      <table style={{ width: '100%', tableLayout: 'fixed' }}>
-        <tbody>
+      <table
+        cellPadding='0'
+        style={{
+          width: '100%',
+          tableLayout: 'fixed',
+          borderSpacing: 0
+        }}
+      >
+        <thead style={{ backgroundColor: headerBackground }}>
           <tr>
             {Object.values(daysGroupedByWeek)[0].map((date) => (
-              <td
-                key={format(date, 'd')}
-                style={{ padding: '5px 0', width: '14%' }}
-              >
+              <th key={format(date, 'd')} style={{ width: '14%' }}>
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '5px 0',
+                    padding: '5px 0 5px 0',
+                    // backgroundColor: 'orange',
                     fontSize: '10px'
                   }}
                 >
                   {format(date, 'EEE')}
                 </div>
-              </td>
+              </th>
             ))}
           </tr>
-
+        </thead>
+        <tbody style={{ backgroundColor: bodyBackground }}>
           {Object.entries(daysGroupedByWeek).map(([index, week]) => {
             return (
               <tr key={index}>
                 {week.map((date) => {
                   const isExtraDay = getMonth(date) !== month
                   const isNormalDay = !isExtraDay
+                  const style = isNormalDay
+                    ? styleByDate[format(date, 'yyyy-MM-dd')]
+                    : extraDayStyleByDate[format(date, 'yyyy-MM-dd')]
+
+                  const defaultColor = isNormalDay ? dayColor : extraDayColor
 
                   return (
-                    <td
-                      key={format(date, 'd')}
-                      style={{ padding: '0px 0', margin: '5px' }}
-                    >
+                    <td key={format(date, 'd')}>
                       {(isNormalDay || showExtraDays) && (
                         <div
                           style={{
+                            position: 'relative',
                             display: 'flex',
                             justifyContent: 'center',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            marginTop: '10px'
+                            // marginBottom: '5px',
+                            // backgroundColor: 'blue'
                           }}
                         >
                           <div
+                            style={{
+                              position: 'absolute',
+                              backgroundColor: style?.leftBackgroundColor,
+                              width: '50%',
+                              height: '100%',
+                              top: 0,
+                              left: 0,
+                              zIndex: 1
+                            }}
+                          />
+                          <div
+                            style={{
+                              position: 'absolute',
+                              backgroundColor: style?.rightBackgroundColor,
+                              width: '50%',
+                              height: '100%',
+                              top: 0,
+                              right: 0,
+                              zIndex: 1
+                            }}
+                          />
+                          <div
                             color='primary'
                             style={{
-                              ...{ fontSize: '12px' },
-                              ...(isNormalDay
-                                ? {
-                                    color: dayColor,
-                                    ...styleByDate[format(date, 'yyyy-MM-dd')]
-                                  }
-                                : {
-                                    color: extraDayColor,
-                                    ...extraDayStyleByDate[
-                                      format(date, 'yyyy-MM-dd')
-                                    ]
-                                  })
+                              zIndex: 2,
+                              display: 'flex',
+                              justifyContent: 'center',
+                              fontSize: '14px',
+                              backgroundColor: style?.capsuleBackgroundColor,
+                              borderRadius: '20px',
+                              alignItems: 'center',
+                              width: '40px',
+                              height: '40px',
+                              color: style?.fontColor || defaultColor
                             }}
                             onClick={() => onClick(date)}
                           >
-                            <div
-                              style={{
-                                textAlign: 'center',
-                                width: '16px'
-                              }}
-                            >
-                              {format(date, 'd')}
-                            </div>
+                            {format(date, 'd')}
                           </div>
                         </div>
                       )}
