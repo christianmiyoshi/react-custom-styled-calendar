@@ -13,7 +13,10 @@ import {
 } from 'date-fns'
 import { groupBy, take } from 'lodash'
 
-const Container = styled.div``
+const Container = styled.div`
+  height: 100%;
+  width: 100%;
+`
 
 const MonthLabel = styled.div`
   font-size: 14px;
@@ -47,8 +50,6 @@ export interface ReactCustomStyledCalendarProps {
   bodyBackground?: string
   headerBackground?: string
 }
-
-// const emptyFunction = () => {}
 
 const calculateDatesToShowInMonth = (
   year: number,
@@ -88,8 +89,8 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
   showYear = true,
   showMonth = true,
   isClickOnCapsule = true,
-  onClick = (date: Date) => console.log('click', date),
-  onHover = (date: Date) => console.log('hover', date),
+  onClick,
+  onHover,
   dayColor = '#000',
   extraDayColor = '#ccc',
   styleByDate = {},
@@ -115,6 +116,7 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
         cellPadding='0'
         style={{
           width: '100%',
+          height: '100%',
           tableLayout: 'fixed',
           borderSpacing: 0
         }}
@@ -161,12 +163,14 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            marginTop: '10px',
-                            cursor: !isClickOnCapsule ? 'pointer' : ''
+                            cursor:
+                              onClick && !isClickOnCapsule ? 'pointer' : ''
                           }}
-                          onClick={() => !isClickOnCapsule && onClick(date)}
+                          onClick={() =>
+                            !isClickOnCapsule && onClick && onClick(date)
+                          }
                           onMouseEnter={() =>
-                            !isClickOnCapsule && onHover(date)
+                            !isClickOnCapsule && onHover && onHover(date)
                           }
                         >
                           <div
@@ -204,11 +208,14 @@ const ReactCustomStyledCalendar: React.FC<ReactCustomStyledCalendarProps> = ({
                               width: '40px',
                               height: '40px',
                               color: style?.fontColor || defaultColor,
-                              cursor: isClickOnCapsule ? 'pointer' : ''
+                              cursor:
+                                onClick && isClickOnCapsule ? 'pointer' : ''
                             }}
-                            onClick={() => isClickOnCapsule && onClick(date)}
+                            onClick={() =>
+                              isClickOnCapsule && onClick && onClick(date)
+                            }
                             onMouseEnter={() =>
-                              isClickOnCapsule && onHover(date)
+                              isClickOnCapsule && onHover && onHover(date)
                             }
                           >
                             {format(date, 'd')}

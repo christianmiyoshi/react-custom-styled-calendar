@@ -1,26 +1,35 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import ReactCustomStyledCalendar, {
   IStyleByDate
 } from '../ReactCustomStyledCalendar'
 import { format, isSameDay } from 'date-fns'
 
-interface ReactCustomInputDateCalendarProps {}
+interface ReactCustomInputDateCalendarProps {
+  month: number
+  year: number
+  color?: string
+}
 
-const ReactCustomInputDateCalendar: React.FC<ReactCustomInputDateCalendarProps> = () => {
-  const year = 2021
-  const month = 1
+const ReactCustomInputDateCalendar: React.FC<ReactCustomInputDateCalendarProps> = ({
+  month,
+  year,
+  color = 'DeepSkyBlue'
+}) => {
   const isMultipleSelect = true
 
   const [selectedDates, setSelectedDates] = useState<Date[]>([])
 
-  const styleByDate = selectedDates.reduce((acc: IStyleByDate, date) => {
-    return (
-      (acc[format(date, 'yyyy-MM-dd')] = {
-        capsuleBackgroundColor: 'DeepSkyBlue'
-      }),
-      acc
-    )
-  }, {})
+  const selectedStyle = useMemo(
+    () => ({
+      capsuleBackgroundColor: color || 'DeepSkyBlue'
+    }),
+    [color]
+  )
+
+  const styleByDate = selectedDates.reduce((acc, date) => {
+    acc[format(date, 'yyyy-MM-dd')] = selectedStyle
+    return acc
+  }, {} as IStyleByDate)
 
   const onClick = !isMultipleSelect
     ? (date: Date) => setSelectedDates([date])
@@ -44,7 +53,6 @@ const ReactCustomInputDateCalendar: React.FC<ReactCustomInputDateCalendarProps> 
       styleByDate={styleByDate}
       extraDayStyleByDate={styleByDate}
       onClick={onClick}
-      bodyBackground='whitesmoke'
     />
   )
 }

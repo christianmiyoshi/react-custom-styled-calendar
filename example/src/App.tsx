@@ -23,9 +23,13 @@ import 'react-custom-styled-calendar/dist/index.css'
 // }
 
 const App = () => {  
-  return <ReactCustomInputDateCalendar 
-    
-  />   
+  return <div style={{height: '300px', width: '350px'}}>
+      <ReactCustomInputDateCalendar 
+        month={1} 
+        year={2021} 
+      />   
+    </div>
+  
 }
 
 export default App
