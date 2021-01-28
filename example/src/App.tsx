@@ -25,7 +25,7 @@ import 'react-custom-styled-calendar/dist/index.css'
 const App = () => {  
   return <div style={{height: '300px', width: '350px'}}>
       <ReactCustomInputDateCalendar 
-        month={1} 
+        month={11} 
         year={2021} 
       />   
     </div>

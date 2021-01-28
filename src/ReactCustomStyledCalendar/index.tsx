@@ -71,7 +71,15 @@ const calculateDatesToShowInMonth = (
   const numberOfWeeks = 6
   const numberOfDaysInWeek = 7
   const datesToShow = take(dates, numberOfDaysInWeek * numberOfWeeks)
-  const daysGroupedByWeek = groupBy(datesToShow, (date) => getWeek(date))
+  const daysGroupedByWeek = groupBy(datesToShow, (date) => {
+    let weekNumber = getWeek(date)
+    const isDecember = month === 11
+    const maxWeeksInYear = 53
+    if (isDecember && weekNumber < 10) {
+      weekNumber += maxWeeksInYear
+    }
+    return weekNumber
+  })
 
   return {
     startMonth,
